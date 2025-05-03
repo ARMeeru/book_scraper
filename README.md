@@ -71,4 +71,4 @@ for book in books[:5]:
 ```
 
 ## License
-This project is released under the MIT License. See `LICENSE` for details.
+This project is released under the MIT License. See [LICENSE](https://github.com/ARMeeru/book_scraper/blob/main/LICENSE) for details.
