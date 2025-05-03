@@ -78,27 +78,28 @@ def scrape_book_details(page):
 
 
 def scrape_all_books():
-    """Scrape all books from all pages and return a list of book data."""
+    """Scrape all books from all pages by following 'next' links and return a list of book data."""
     base_url = "http://books.toscrape.com"
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page()
 
-        # Determine total pages from the first page
-        page.goto(f"{base_url}/catalogue/page-1.html")
-        total_pages_text = page.query_selector(
-            ".current"
-        ).inner_text()  # e.g., "Page 1 of 50"
-        total_pages = int(total_pages_text.split()[-1])
-
-        # Collect all book URLs
+        # Start at the first page
+        current_url = f"{base_url}/catalogue/page-1.html"
         book_urls = []
-        for i in range(1, total_pages + 1):
-            page_url = f"{base_url}/catalogue/page-{i}.html"
-            page.goto(page_url)
+        page_number = 1
+        while current_url:
+            page.goto(current_url)
             urls = get_book_urls(page, base_url)
             book_urls.extend(urls)
-            logging.info(f"Scraped URLs from page {i} of {total_pages}")
+            logging.info(f"Scraped URLs from page {page_number}")
+            next_link = page.query_selector("li.next a")
+            if next_link:
+                next_href = next_link.get_attribute("href")
+                current_url = f"{base_url}/catalogue/{next_href}"
+                page_number += 1
+            else:
+                current_url = None
 
         # Scrape details for each book
         books = []
